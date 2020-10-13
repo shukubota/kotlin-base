@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/FirstScreenFragment">
+
+    <fragment
+        android:id="@+id/FirstScreenFragment"
+        android:name="com.example.kotlin_template.ui.fragments.FirstScreenFragment"
+        android:label="fragment_first_screen"
+        tools:layout="@layout/fragment_first_screen" >
+        <action
+            android:id="@+id/action_firstScreenFragment_to_secondScreenFragment"
+            app:destination="@id/SecondScreenFragment" />
+        <action
+            android:id="@+id/action_FirstScreenFragment_to_SecondScreenFragment"
+            app:destination="@id/SecondScreenFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/SecondScreenFragment"
+        android:name="com.example.kotlin_template.ui.fragments.SecondScreenFragment"
+        android:label="fragment_second_screen_fragment"
+        tools:layout="@layout/fragment_second_screen" />
+</navigation>
