@@ -1,21 +1,28 @@
 package com.example.kotlin_template.ui.fragments
 
+import android.bluetooth.BluetoothManager
+import android.content.Context
+import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import androidx.navigation.Navigation
+import androidx.fragment.app.Fragment
 import com.example.kotlin_template.R
+import com.gigatms.*
+import com.gigatms.UHF.UhfClassVersion
 import com.google.gson.Gson
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.util.*
+
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -29,10 +36,30 @@ data class Greeting(val message: String)
 
 data class SendData(val name: String, val id: Int)
 
-class FirstScreenFragment : Fragment() {
+class FirstScreenFragment : Fragment(), ScannerCallback, ScanDebugCallback {
+    override fun didDiscoveredDevice(baseDevice: BaseDevice?) {
+        Log.d("aaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        val ts800 = baseDevice as TS800?
+    }
+    override fun didScanStop() {
+        Log.d("maion", "ffffffffffff")
+    }
+
+    override fun didSend(a: ByteArray, b: String) {
+        Log.d("main", "didsend")
+        Log.d("main", a.toString())
+        Log.d("main", b)
+    }
+
+    override fun didReceive(a: ByteArray, b: String) {
+        Log.d("main", "didSReveive")
+        Log.d("main", a.toString())
+        Log.d("main", b)
+    }
+
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_first_screen, container, false)
@@ -41,20 +68,46 @@ class FirstScreenFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d("mainmain", "aaddddwwwwwwwddeeaaaa")
+
+
+
         view.findViewById<Button>(R.id.goSecondScreen)
             .setOnClickListener { v ->
                 Log.d("mainmain", "aaddeeaaaa")
-                Navigation.findNavController(v) // (1)
-                    .navigate(R.id.SecondScreenFragment) // (2)
+                val scannerCallback = ScannerCallbackImpl()
+                val context = getContext()
+                Log.d("mainmain", context.toString())
+                val uhfScanner = UHFScanner(UhfClassVersion.TS800, context, this, CommunicationType.BLE)
+
+                Log.d("mainmain4444", "aaddddwwwwwwwddeeaaaa")
+//                uhfScanner.setScanDebugCallback(ScanDebugCallbackImpl());
+                uhfScanner.setScanDebugCallback(this);
+
+                val type: CommunicationType = uhfScanner.getCurrentCommunicationType()
+                when (type) {
+                    CommunicationType.UDP -> {
+                        val wifiManager = Objects.requireNonNull<Any?>(getContext()).getFlutterContext().getSystemService(Context.WIFI_SERVICE) as WifiManager
+                        wifiManager.isWifiEnabled
+                    }
+                    CommunicationType.BLE -> {
+                        val bleManager = Objects.requireNonNull<Any?>(getContext()).getApplicationContext().getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+                        val bluetoothAdapter = bleManager.adapter
+                        bluetoothAdapter.isEnabled
+                    }
+                    else -> false
+                }
+                uhfScanner.startScan();
+//                Navigation.findNavController(v) // (1)
+//                    .navigate(R.id.SecondScreenFragment) // (2)
             }
 
-        view.findViewById<Button>(R.id.callapi)
-                .setOnClickListener {
-                    Log.d("mainmain", "callapi")
-//                    onParallelGetButtonClick();
-                    onPost();
-
-                }
+//        view.findViewById<Button>(R.id.callapi)
+//                .setOnClickListener {
+//                    Log.d("mainmain", "callapi")
+////                    onParallelGetButtonClick();
+//                    onPost();
+//
+//                }
     }
 
     fun onParallelGetButtonClick() = runBlocking {
@@ -106,3 +159,32 @@ class FirstScreenFragment : Fragment() {
     }
 }
 
+class ScannerCallbackImpl() : ScannerCallback {
+//    override fun didDiscoveredDevice(baseDevice: BaseDevice?) {
+//        Log.d("aaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+//        Log.d("aaaaaaaaaaaffaaaaa", baseDevice.toString())
+//    }
+
+    override fun didDiscoveredDevice(baseDevice: BaseDevice?) {
+        Log.d("aaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        val ts800 = baseDevice as TS800?
+    }
+
+    override fun didScanStop() {
+        Log.d("maion", "ffffffffffff")
+    }
+}
+
+class ScanDebugCallbackImpl: ScanDebugCallback {
+    override fun didSend(a: ByteArray, b: String) {
+        Log.d("main", "didsend")
+        Log.d("main", a.toString())
+        Log.d("main", b)
+    }
+
+    override fun didReceive(a: ByteArray, b: String) {
+        Log.d("main", "didSReveive")
+        Log.d("main", a.toString())
+        Log.d("main", b)
+    }
+}
