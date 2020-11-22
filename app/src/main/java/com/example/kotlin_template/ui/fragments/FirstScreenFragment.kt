@@ -84,19 +84,22 @@ class FirstScreenFragment : Fragment(), ScannerCallback, ScanDebugCallback {
                 uhfScanner.setScanDebugCallback(this);
 
                 val type: CommunicationType = uhfScanner.getCurrentCommunicationType()
+                Log.d("mainaaaaaaatype", type.toString())
                 when (type) {
                     CommunicationType.UDP -> {
-                        val wifiManager = Objects.requireNonNull<Any?>(getContext()).getFlutterContext().getSystemService(Context.WIFI_SERVICE) as WifiManager
-                        wifiManager.isWifiEnabled
+//                        val wifiManager = Objects.requireNonNull<Any?>(getContext()).getFlutterContext().getSystemService(Context.WIFI_SERVICE) as WifiManager
+//                        wifiManager.isWifiEnabled
                     }
                     CommunicationType.BLE -> {
-                        val bleManager = Objects.requireNonNull<Any?>(getContext()).getApplicationContext().getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+                        Log.d("bleble", "ble")
+                        val bleManager = getContext()!!.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
                         val bluetoothAdapter = bleManager.adapter
-                        bluetoothAdapter.isEnabled
+                        val isOk = bluetoothAdapter.isEnabled
+                        Log.d("isOK",isOk.toString());
                     }
-                    else -> false
+                    else -> Log.d("ngngngng", "ffffffffff")
                 }
-                uhfScanner.startScan();
+                uhfScanner.startScan(10000);
 //                Navigation.findNavController(v) // (1)
 //                    .navigate(R.id.SecondScreenFragment) // (2)
             }
